@@ -16,25 +16,25 @@ function Frame7() {
   const frames = {
     classic: {
       name: 'Classic Gold',
-      image: '/frame3.png',
+      image: '/framesam.png',
       // 'https://images.pexels.com/photos/1579708/pexels-photo-1579708.jpeg?auto=compress&cs=tinysrgb&w=800&h=800',
       border: 20,
     },
-    modern: {
-      name: 'Modern Black',
-      image: 'https://images.pexels.com/photos/1164778/pexels-photo-1164778.jpeg?auto=compress&cs=tinysrgb&w=800&h=800',
-      border: 15,
-    },
-    elegant: {
-      name: 'Elegant Silver',
-      image: 'https://images.pexels.com/photos/1084199/pexels-photo-1084199.jpeg?auto=compress&cs=tinysrgb&w=800&h=800',
-      border: 18,
-    },
-    vintage: {
-      name: 'Vintage Wood',
-      image: 'https://images.pexels.com/photos/172276/pexels-photo-172276.jpeg?auto=compress&cs=tinysrgb&w=800&h=800',
-      border: 25,
-    },
+    // modern: {
+    //   name: 'Modern Black',
+    //   image: 'https://images.pexels.com/photos/1164778/pexels-photo-1164778.jpeg?auto=compress&cs=tinysrgb&w=800&h=800',
+    //   border: 15,
+    // },
+    // elegant: {
+    //   name: 'Elegant Silver',
+    //   image: 'https://images.pexels.com/photos/1084199/pexels-photo-1084199.jpeg?auto=compress&cs=tinysrgb&w=800&h=800',
+    //   border: 18,
+    // },
+    // vintage: {
+    //   name: 'Vintage Wood',
+    //   image: 'https://images.pexels.com/photos/172276/pexels-photo-172276.jpeg?auto=compress&cs=tinysrgb&w=800&h=800',
+    //   border: 25,
+    // },
   };
 
   useEffect(() => {
@@ -215,25 +215,32 @@ function Frame7() {
       selfieImg.crossOrigin = 'anonymous';
 
       selfieImg.onload = () => {
-        const canvasSize = 1200;
-        canvas.width = canvasSize;
-        canvas.height = canvasSize;
+        // target download size
+        const targetWidth = 412;
+        const targetHeight = 917;
 
-        ctx.drawImage(frameImg, 0, 0, canvasSize, canvasSize);
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
 
-        const frameBorderPx = (frameStyle.border / 800) * canvasSize;
-        const innerSize = canvasSize - (frameBorderPx * 2);
+        // draw the frame background stretched to canvas size
+        ctx.drawImage(frameImg, 0, 0, targetWidth, targetHeight);
 
-        const baseScale = Math.min(innerSize / selfieImg.width, innerSize / selfieImg.height) * 0.65;
+        // calculate border scaling relative to smaller dimension
+        const frameBorderPx = (frameStyle.border / 800) * Math.min(targetWidth, targetHeight);
+        const innerWidth = targetWidth - (frameBorderPx * 2);
+        const innerHeight = targetHeight - (frameBorderPx * 2);
+
+        // scale selfie to fit inside inner rect
+        const baseScale = Math.min(innerWidth / selfieImg.width, innerHeight / selfieImg.height) * 0.65;
         const finalScale = baseScale * image.scale;
         const scaledWidth = selfieImg.width * finalScale;
         const scaledHeight = selfieImg.height * finalScale;
 
-        const centerX = canvasSize / 2;
-        const centerY = canvasSize / 2;
+        const centerX = targetWidth / 2;
+        const centerY = targetHeight / 2;
 
-        const offsetXScaled = (image.offsetX / 50) * (innerSize / 4);
-        const offsetYScaled = (image.offsetY / 50) * (innerSize / 4);
+        const offsetXScaled = (image.offsetX / 50) * (innerWidth / 4);
+        const offsetYScaled = (image.offsetY / 50) * (innerHeight / 4);
 
         const x = centerX - scaledWidth / 2 + offsetXScaled;
         const y = centerY - scaledHeight / 2 + offsetYScaled;
@@ -252,11 +259,13 @@ function Frame7() {
         }, 'image/png');
       };
 
+      // ✅ only set once
       selfieImg.src = image.processed;
     };
 
     frameImg.src = frameStyle.image;
   };
+
 
   const downloadAll = async () => {
     const processedImages = images.filter(img => img.processed);
@@ -273,7 +282,7 @@ function Frame7() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen w-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-6 sm:mb-8">
@@ -373,7 +382,7 @@ function Frame7() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {images.map((image) => (
                     <div key={image.id} className="border-2 border-slate-200 rounded-lg p-4">
-                      <div className="relative w-[20rem] h-[30rem] mb-3 rounded-lg overflow-hidden bg-slate-50">
+                      <div className="relative w-[412px] h-[917px] mb-3 rounded-lg overflow-hidden bg-slate-50">
                         {image.isProcessing ? (
                           <div className="absolute inset-0 flex flex-col items-center justify-center">
                             <Loader2 className="w-8 h-8 animate-spin text-slate-600 mb-2" />
@@ -413,7 +422,7 @@ function Frame7() {
                             <input
                               type="range"
                               min="0.3"
-                              max="2"
+                              max="3"
                               step="0.1"
                               value={image.scale}
                               onChange={(e) => updateImageScale(image.id, parseFloat(e.target.value))}
